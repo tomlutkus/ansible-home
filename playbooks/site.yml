@@ -1,0 +1,8 @@
+---
+- name: Homelab baseline configuration
+  hosts: all
+  become: true
+
+  tasks:
+    - name: ping all hosts
+      ping:

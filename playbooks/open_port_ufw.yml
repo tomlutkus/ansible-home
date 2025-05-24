@@ -1,0 +1,24 @@
+---
+# This playbook opens port_number from ip_address on UFW
+- name: Open port {{ port_number }} on Ubuntu servers using UFW
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Ensure UFW is installed
+      apt:
+        name: ufw
+        state: present
+        update_cache: yes
+
+    - name: Ensure UFW is enabled
+      ufw:
+        state: enabled
+
+    - name: Allow TCP port {{ port_number }} from {{ ip_address }}
+      ufw:
+        rule: allow
+        port: '{{ port_number }}'
+        proto: tcp
+        from_ip: {{ ip_address }}
+

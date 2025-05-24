@@ -1,0 +1,23 @@
+all:
+  children:
+    homelab:
+      vars:
+        ansible_user: ansibleadmin
+        ansible_ssh_private_key_file: ~/.ssh/ansible_ed25519
+      hosts:
+        vm-01:
+          ansible_host: 10.0.0.101
+        vm-02:
+          ansible_host: 10.0.0.102
+        vm-03:
+          ansible_host: 10.0.0.103
+        vault:
+          ansible_host: 10.0.0.171
+        netbox:
+          ansible_host: 10.0.0.172
+        vm-nd-01:
+          ansible_host: 10.0.0.121
+        vm-nd-02:
+          ansible_host: 10.0.0.122
+        vm-nd-03:
+          ansible_host: 10.0.0.123

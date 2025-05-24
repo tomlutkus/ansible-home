@@ -1,0 +1,11 @@
+---
+# This playbook removes an ssh_pubkey from authorized keys in the target
+- hosts: all
+  become: yes
+  tasks:
+    - name: Remove {{ ssh_pubkey }} from authorized_keys
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: absent
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/{{ ssh_pubkey }}') }}"
+

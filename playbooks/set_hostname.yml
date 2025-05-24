@@ -1,0 +1,24 @@
+---
+# This playbook sets a new host_name for the target 
+- name: Set hostname for the target
+  hosts: {{ host_name }}
+  become: true
+  tasks:
+    - name: Set the new hostname
+      hostname:
+        name: hostname
+
+    - name: Ensure /etc/hosts has the correct hostname entry
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1\s+'
+        line: '127.0.1.1 hostname'
+        state: present
+
+    - name: Reboot the system
+      reboot:
+        msg: "Rebooting to finalize hostname change"
+        pre_reboot_delay: 5
+        reboot_timeout: 300
+        test_command: whoami
+

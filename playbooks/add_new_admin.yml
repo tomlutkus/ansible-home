@@ -1,0 +1,36 @@
+---
+# This playbook is adding a new user with password, ssh-key and group
+# membership to group "admin"
+- hosts: all
+  become: yes
+  tasks:
+    # Add user by user_name and set password as in .hash file
+    - name: Ensure '{{ user_name }}' user exists with specified password hash
+      user:
+        name: {{ user_name }}
+        password: "{{ lookup('file', lookup('env', 'HOME') + '/folder/secrets/password.hash') }}"
+        shell: /bin/bash
+        groups: admin
+        append: yes
+        state: present
+        create_home: yes
+
+    # Make sure that the user can sudo and is passwordless sudo
+    - name: Ensure '{{ user_name }}' has passwordless sudo (optional – can require password instead)
+      copy:
+        dest: /etc/sudoers.d/{{ user_name }}
+        content: "{{ user_name }} ALL=(ALL) NOPASSWD:ALL\n"
+        mode: '0440'
+      notify: Validate sudoers
+
+    # Add a public key for that user in the server into his home folder 
+    - name: Add SSH public key to {{ user_name }}'s authorized_keys
+      authorized_key:
+        user: {{ user_name }}
+        state: present
+        key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_ed25519.pub') }}"
+
+  handlers:
+    - name: Validate sudoers
+      command: visudo -cf /etc/sudoers.d/{{ user_name }}
+

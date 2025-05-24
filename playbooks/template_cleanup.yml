@@ -1,0 +1,62 @@
+- name: Clean Ubuntu VM before converting to template
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Clean machine-id and dbus id
+      shell: |
+        truncate -s 0 /etc/machine-id
+        rm -f /var/lib/dbus/machine-id
+      args:
+        warn: false
+
+    - name: Remove SSH host keys
+      file:
+        path: "/etc/ssh/ssh_host_*"
+        state: absent
+        force: true
+
+    - name: Cloud-init clean
+      shell: cloud-init clean --logs --seed
+      args:
+        warn: false
+      when: ansible_facts.packages['cloud-init'] is defined
+
+    - name: Remove DHCP leases
+      file:
+        path: "/var/lib/dhcpcd/"
+        state: absent
+        force: true
+
+    - name: Clear bash history for root
+      file:
+        path: "/root/.bash_history"
+        state: absent
+
+    - name: Clear bash history for current user
+      file:
+        path: "{{ ansible_env.HOME }}/.bash_history"
+        state: absent
+
+    - name: Rotate and vacuum journal logs
+      shell: |
+        journalctl --rotate
+        journalctl --vacuum-time=1s
+      args:
+        warn: false
+
+    - name: Remove archived log files
+      shell: rm -rf /var/log/*.gz /var/log/*.[0-9] /var/log/journal/* /var/log/cloud-init*
+      args:
+        warn: false
+
+    - name: Clean apt cache
+      apt:
+        autoclean: yes
+        autoremove: yes
+
+    - name: Shutdown the server (optional if you want automatic shutdown)
+      shell: shutdown now
+      ignore_errors: true
+      when: shutdown_after_cleanup | default(false)
+
