@@ -52,4 +52,3 @@ Sensitive data (vault passwords, private inventories) are **not included** and s
 ☁️ No cloud-specific hardcoding
 🩼 Clean YAML, linted, human-readable
 
-## 📜 License
